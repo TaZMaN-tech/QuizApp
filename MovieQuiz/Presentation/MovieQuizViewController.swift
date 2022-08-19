@@ -5,6 +5,8 @@ final class MovieQuizViewController: UIViewController {
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var textLabel: UILabel!
     @IBOutlet private var counterLabel: UILabel!
+    @IBOutlet private var yesButton: UIButton!
+    @IBOutlet private var noButton: UIButton!
     
     struct QuizQuestion {
       let image: String
@@ -70,6 +72,8 @@ final class MovieQuizViewController: UIViewController {
     }
     
     @IBAction private func yesButtonClicked(_ sender: UIButton) {
+        yesButton.isEnabled = false
+        noButton.isEnabled = false
         let currentQuestion = questions[currentQuestionIndex]
         var isCorrect = false
         if currentQuestion.correctAnswer == true {
@@ -81,10 +85,14 @@ final class MovieQuizViewController: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.imageView.layer.borderWidth = 0
             self.showNextQuestionOrResults()
+            self.yesButton.isEnabled = true
+            self.noButton.isEnabled = true
         }
     }
 
     @IBAction private func noButtonClicked(_ sender: UIButton) {
+        yesButton.isEnabled = false
+        noButton.isEnabled = false
         let currentQuestion = questions[currentQuestionIndex]
         var isCorrect = false
         if currentQuestion.correctAnswer == false {
@@ -96,6 +104,8 @@ final class MovieQuizViewController: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.imageView.layer.borderWidth = 0
             self.showNextQuestionOrResults()
+            self.yesButton.isEnabled = true
+            self.noButton.isEnabled = true
             
         }
         
@@ -104,7 +114,7 @@ final class MovieQuizViewController: UIViewController {
     private func show(quiz step: QuizStepViewModel) {
         imageView.image = UIImage(named: step.image)
         textLabel.text = step.text
-        counterLabel.text = String(step.count)
+        counterLabel.text = "\(step.count)/10"
     }
 
     private func show(quiz result: QuizResultsViewModel) {
@@ -148,25 +158,29 @@ final class MovieQuizViewController: UIViewController {
     }
     
     private func showAnswerResult(isCorrect: Bool) {
+        yesButton.isEnabled = false
+        noButton.isEnabled = false
         imageView.layer.masksToBounds = true // даём разрешение на рисование рамки
         imageView.layer.borderWidth = 8 // толщина рамки
         if isCorrect == true {
-            imageView.layer.borderColor = UIColor.green.cgColor // делаем рамку белой
+            imageView.layer.borderColor = UIColor(named: "YP Green")?.cgColor // делаем рамку белой
         } else {
-            imageView.layer.borderColor = UIColor.red.cgColor
+            imageView.layer.borderColor = UIColor(named: "YP Red")?.cgColor
         }
         
-        imageView.layer.cornerRadius = 6 // радиус скругления углов рамки
+        imageView.layer.cornerRadius = 20 // радиус скругления углов рамки
     }
     
     private func showNextQuestionOrResults() {
         
         if currentQuestionIndex == questions.count - 1 { // - 1 потому что индекс начинается с 0, а длинна массива — с 1
             show(quiz: quizResults)
-        } else {
+        } else if currentQuestionIndex < questions.count - 1 {
             currentQuestionIndex += 1 // увеличиваем индекс текущего урока на 1; таким образом мы сможем получить следующий урок
             show(quiz: convert(model: questions[currentQuestionIndex]))
-       }
+        } else {
+            print("Error")
+        }
     }
     /*
  Mock-данные
