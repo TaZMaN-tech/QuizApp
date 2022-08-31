@@ -6,3 +6,10 @@
 //
 
 import Foundation
+import UIKit
+
+struct QuizStepViewModel {
+    let image: String
+    let text: String
+    let count: Int
+}
