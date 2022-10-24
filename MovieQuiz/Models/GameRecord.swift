@@ -7,18 +7,16 @@
 
 import Foundation
 
-struct GameRecord: Codable {
+struct GameRecord: Codable, Comparable {
+    static func < (lhs: GameRecord, rhs: GameRecord) -> Bool {
+        lhs.correct < rhs.correct
+    }
+
+    static func == (lhs: GameRecord, rhs: GameRecord) -> Bool {
+        lhs.correct == rhs.correct
+    }
+
     var correct: Int
     let total: Int
     let date: Date
-    
-    mutating func compare(newRecord: GameRecord) -> Int {
-        if self.correct > newRecord.correct {
-            return 1
-        } else if self.correct == newRecord.correct {
-            return 0
-        } else {
-            return -1
-        }
-    }
 }

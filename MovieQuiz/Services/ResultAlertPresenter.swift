@@ -8,7 +8,6 @@
 import UIKit
 
 class ResultAlertPresenter: UIViewController, AlertPresenterProtocol {
-
     func show(message: String, onAction: @escaping (UIAlertAction) -> Void) -> UIAlertController {
         let alert = UIAlertController(title: "Этот рануд окончен!", // заголовок всплывающего окна
                                       message: message, // текст во всплывающем окне
