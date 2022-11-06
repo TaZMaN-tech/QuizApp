@@ -8,5 +8,5 @@
 import UIKit
 
 protocol AlertPresenterProtocol {
-    func show(message: String, onAction: @escaping (UIAlertAction) -> Void) -> UIAlertController
+    func show(title: String, message: String, buttonText: String, onAction: @escaping (UIAlertAction) -> Void) -> UIAlertController
 }

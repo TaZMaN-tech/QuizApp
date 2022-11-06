@@ -6,6 +6,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private var counterLabel: UILabel!
     @IBOutlet private var yesButton: UIButton!
     @IBOutlet private var noButton: UIButton!
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
 
     private var currentQuestionIndex: Int = 0
     private let questionsAmount: Int = 10
@@ -21,8 +22,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         statisticService = StatisticServiceImplementation()
-        questionFactory = QuestionFactory(delegate: self)
-        questionFactory?.requestNextQuestion()
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        questionFactory?.loadData()
+        showLoadingIndicator()
         resultAlertPresenter = ResultAlertPresenter()
     }
 
@@ -42,6 +44,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)
         }
+    }
+
+    func didLoadDataFromServer() {
+        activityIndicator.isHidden = true // скрываем индикатор загрузки
+        questionFactory?.requestNextQuestion()
+    }
+
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription) // возьмём в качестве сообщения описание ошибки
     }
 
     func answerButtonClicked(yesAnswer: Bool) {
@@ -74,7 +85,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
 
     private func show(quiz step: QuizStepViewModel) {
-        imageView.image = UIImage(named: step.image)
+        imageView.image = step.image
         textLabel.text = step.text
         counterLabel.text = "\(step.count)/10"
     }
@@ -84,7 +95,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         // создаём объекты всплывающего окна
         quizResults.gamesCount += 1
         statisticService?.store(correct: quizResults.correctAnswers, total: quizResults.totalAnswers)
-        guard let alert = resultAlertPresenter?.show(message: statisticService?.getMessage(result: quizResults) ?? "", onAction: { [self] _ in
+        guard let alert = resultAlertPresenter?.show(title: "Этот рануд окончен!", message: statisticService?.getMessage(result: quizResults) ?? "", buttonText: "Сыграть еще раз", onAction: { [self] _ in
             print("OK button is clicked!")
             self.currentQuestionIndex = 0
             self.quizResults.totalAnswers = 0
@@ -97,7 +108,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
 
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         // currentQuestionIndex += 1
-        let firstStep = QuizStepViewModel(image: model.image, text: model.text, count: currentQuestionIndex + 1)
+        let firstStep = QuizStepViewModel(image: (UIImage(data: model.image) ?? UIImage()), text: model.text, count: currentQuestionIndex + 1)
         return firstStep
     }
 
@@ -124,6 +135,33 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         } else {
             print("Error")
         }
+    }
+
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
+        activityIndicator.startAnimating() // включаем анимацию
+    }
+
+    private func hideLoadingIndicator() {
+        activityIndicator.isHidden = true
+        activityIndicator.stopAnimating()
+    }
+
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator() // скрываем индикатор загрузки
+
+        guard let model = resultAlertPresenter?.show(title: "Ошибка",
+                                               message: message,
+                                               buttonText: "Попробовать еще раз",
+                                               onAction: { [self] _ in
+            print("OK button is clicked!")
+            self.currentQuestionIndex = 0
+            self.quizResults.totalAnswers = 0
+            self.quizResults.correctAnswers = 0
+            questionFactory?.requestNextQuestion() }) else { return }
+
+        // показываем всплывающее окно
+        self.present(model, animated: true, completion: nil)
     }
     /*
      Mock-данные
