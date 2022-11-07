@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 struct QuizStepViewModel {
-    let image: String
+    let image: UIImage
     let text: String
     let count: Int
 }

@@ -8,13 +8,13 @@
 import UIKit
 
 class ResultAlertPresenter: UIViewController, AlertPresenterProtocol {
-    func show(message: String, onAction: @escaping (UIAlertAction) -> Void) -> UIAlertController {
-        let alert = UIAlertController(title: "Этот рануд окончен!", // заголовок всплывающего окна
+    func show(title: String, message: String, buttonText: String, onAction: @escaping (UIAlertAction) -> Void) -> UIAlertController {
+        let alert = UIAlertController(title: title, // заголовок всплывающего окна
                                       message: message, // текст во всплывающем окне
                                       preferredStyle: .alert) // preferredStyle может быть .alert или .actionSheet
 
         // создаём для него кнопки с действиями
-        let action = UIAlertAction(title: "Сыграть еще раз", style: .default, handler: onAction)
+        let action = UIAlertAction(title: buttonText, style: .default, handler: onAction)
 
         // добавляем в алерт кнопки
         alert.addAction(action)
