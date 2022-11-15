@@ -35,6 +35,6 @@ final class MovieQuizPresenterTests: XCTestCase {
 
         XCTAssertNotNil(viewModel.image)
         XCTAssertEqual(viewModel.text, "Question Text")
-        XCTAssertEqual(String(viewModel.count), "1/10")
+        XCTAssertEqual(viewModel.count, 1)
     }
 }
