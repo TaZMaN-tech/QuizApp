@@ -1,17 +1,16 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController, MovieQuizViewControllerProtocol {
-    @IBOutlet var imageView: UIImageView!
+    @IBOutlet weak private var imageView: UIImageView!
     @IBOutlet private var textLabel: UILabel!
     @IBOutlet private var counterLabel: UILabel!
-    @IBOutlet var yesButton: UIButton!
-    @IBOutlet var noButton: UIButton!
-    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
+    @IBOutlet weak private var yesButton: UIButton!
+    @IBOutlet weak private var noButton: UIButton!
+    @IBOutlet weak private var activityIndicator: UIActivityIndicatorView!
 
     private var resultAlertPresenter: AlertPresenterProtocol?
     private var presenter: MovieQuizPresenter!
 
-    var quizResults = QuizResultsViewModel(totalAnswers: 0, correctAnswers: 0, gamesCount: 0)
 
 
     // MARK: - Lifecycle
@@ -50,13 +49,13 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
     func show(quiz result: QuizResultsViewModel) {
         // здесь мы показываем результат прохождения квиза
         // создаём объекты всплывающего окна
-        quizResults.gamesCount += 1
-        presenter.statisticService?.store(correct: quizResults.correctAnswers, total: quizResults.totalAnswers)
-        guard let alert = resultAlertPresenter?.show(title: "Этот раунд окончен!", message: presenter.statisticService?.getMessage(result: quizResults) ?? "", buttonText: "Сыграть ещё раз", onAction: { [self] _ in
+        presenter.quizResults.gamesCount += 1
+        presenter.statisticService?.store(correct: presenter.quizResults.correctAnswers, total: presenter.quizResults.totalAnswers)
+        guard let alert = resultAlertPresenter?.show(title: "Этот раунд окончен!", message: presenter.statisticService?.getMessage(result: presenter.quizResults) ?? "", buttonText: "Сыграть ещё раз", onAction: { [self] _ in
             print("OK button is clicked!")
             self.presenter.resetQuestionIndex()
-            self.quizResults.totalAnswers = 0
-            self.quizResults.correctAnswers = 0
+            self.presenter.quizResults.totalAnswers = 0
+            self.presenter.quizResults.correctAnswers = 0
             self.presenter.restartGame()
         }) else { return }
         alert.view.accessibilityIdentifier = "Game results"
@@ -97,12 +96,25 @@ final class MovieQuizViewController: UIViewController, MovieQuizViewControllerPr
                                                onAction: { [self] _ in
             print("OK button is clicked!")
             self.presenter.resetQuestionIndex()
-            self.quizResults.totalAnswers = 0
-            self.quizResults.correctAnswers = 0
+            self.presenter.quizResults.totalAnswers = 0
+            self.presenter.quizResults.correctAnswers = 0
             self.presenter.restartGame() }) else { return }
 
         // показываем всплывающее окно
         self.present(model, animated: true, completion: nil)
+    }
+
+    func hideBorder() {
+        self.imageView.layer.borderWidth = 0
+    }
+
+    func enableButtons() {
+        self.yesButton.isEnabled = true
+        self.noButton.isEnabled = true
+    }
+
+    func hideActivityIndicator() {
+        self.activityIndicator.isHidden = true
     }
     /*
      Mock-данные

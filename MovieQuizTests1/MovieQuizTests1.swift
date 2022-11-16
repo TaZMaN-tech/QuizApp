@@ -9,6 +9,21 @@ import XCTest
 @testable import MovieQuiz
 
 final class MovieQuizViewControllerProtocolMock: MovieQuizViewControllerProtocol {
+    func hideActivityIndicator() {
+    }
+
+    func hideBorder() {
+    }
+
+    func answerButtonClicked(yesAnswer: Bool) {
+    }
+
+    func enableButtons() {
+    }
+
+    func showAnswerResult(isCorrect: Bool) {
+    }
+
     func show(quiz step: QuizStepViewModel) {
     }
 

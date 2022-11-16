@@ -13,13 +13,14 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     var correctAnswers: Int = 0
     private var questionsAmount: Int = 10
     var currentQuestion: QuizQuestion?
+    var quizResults = QuizResultsViewModel(totalAnswers: 0, correctAnswers: 0, gamesCount: 0)
 
     var statisticService: StatisticServiceImplementation?
-    private weak var viewController: MovieQuizViewController?
+    private weak var viewController: MovieQuizViewControllerProtocol?
     private var questionFactory: QuestionFactoryProtocol?
 
     init(viewController: MovieQuizViewControllerProtocol) {
-        self.viewController = viewController as? MovieQuizViewController
+        self.viewController = viewController
 
         statisticService = StatisticServiceImplementation()
 
@@ -43,7 +44,7 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     }
 
     func didLoadDataFromServer() {
-        viewController?.activityIndicator.isHidden = true // скрываем индикатор загрузки
+        viewController?.hideActivityIndicator() // скрываем индикатор загрузки
         questionFactory?.requestNextQuestion()
     }
 
@@ -52,10 +53,10 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     }
 
     func restartGame() {
-            currentQuestionIndex = 0
-            correctAnswers = 0
-            questionFactory?.requestNextQuestion()
-        }
+        currentQuestionIndex = 0
+        correctAnswers = 0
+        questionFactory?.requestNextQuestion()
+    }
 
 
     func convert(model: QuizQuestion) -> QuizStepViewModel {
@@ -64,11 +65,11 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     }
 
     func isLastQuestion() -> Bool {
-            currentQuestionIndex == questionsAmount - 1
+        currentQuestionIndex == questionsAmount - 1
     }
 
     func switchToNextQuestion() {
-            currentQuestionIndex += 1
+        currentQuestionIndex += 1
     }
 
     func resetQuestionIndex() {
@@ -90,15 +91,15 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
         var isCorrect = false
         if currentQuestion.correctAnswer == yesAnswer {
             isCorrect = true
-            viewController?.quizResults.correctAnswers += 1
+            quizResults.correctAnswers += 1
         }
         viewController?.showAnswerResult(isCorrect: isCorrect)
-        viewController?.quizResults.totalAnswers += 1
+        quizResults.totalAnswers += 1
     }
 
     func showNextQuestionOrResults() {
         if self.isLastQuestion() { // - 1 потому что индекс начинается с 0, а длинна массива — с 1
-            viewController?.show(quiz: viewController?.quizResults ?? QuizResultsViewModel(totalAnswers: 0, correctAnswers: 0, gamesCount: 0))
+            viewController?.show(quiz: quizResults)
         } else {
             self.switchToNextQuestion() // увеличиваем индекс текущего урока на 1; таким образом мы сможем получить следующий урок
             questionFactory?.requestNextQuestion()
@@ -107,10 +108,9 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
 
     func proceedAnswer() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            self.viewController?.imageView.layer.borderWidth = 0
+            self.viewController?.hideBorder()
             self.showNextQuestionOrResults()
-            self.viewController?.yesButton.isEnabled = true
-            self.viewController?.noButton.isEnabled = true
+            self.viewController?.enableButtons()
         }
     }
 }
